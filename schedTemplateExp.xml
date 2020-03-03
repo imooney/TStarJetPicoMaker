@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE note [
+<!ENTITY out "/gpfs01/star/pwg/imooney/P18ih/picos/pAu_200_production_2015/out">
+<!ENTITY lib "pro">
+<!ENTITY mulist "/direct/star+u/imooney/TStarJetPicoMaker/list/MuDsts911_04.list">
+<!ENTITY log "/gpfs01/star/pwg/imooney/P18ih/picos/pAu_200_production_2015/log">
+<!ENTITY mclist "/direct/star+u/imooney/TStarJetPicoMaker/list/minimcs911_04.list">
+]>
+<!-- Created on Mon Mar  2 14:13:04 2020 -->
+<!--<!DOCTYPE note [
+<!ENTITY NFILES "all">
+<!ENTITY MACRO "MakeTStarJetPico_example.cxx">
+<!ENTITY ROOTDIR "/star/u/imooney/TStarJetPicoMaker">
+<!ENTITY OUTDIR "/star/u/imooney/TStarJetPicoMaker/out">
+<!ENTITY INPUT "/star/u/imooney/TStarJetPicoMaker/list/MuDsts2535.list">
+<!ENTITY INPUTMC "/star/u/imooney/TStarJetPicoMaker/list/minimcs2535.list">
+<!ENTITY TRIGGERS "0">
+]>
+-->
+<!--             STAR Collaboration - Nick Elsey             -->
+<!--
+ Script to query STAR catalogue and split the resulting
+ file list into regularly sized jobs for TStarJetPico event
+ production.
+ 
+ OUTDIR/tmplogs must be created before the script is submitted 
+ 
+ To Use: Settings
+ 
+ NFILES:     The number of files to use from the list returned
+ by the catalogue. default: "all" for all files
+ 
+ MACRO:      The root script to be executed: must be located in
+ macros subdirectory. Examples can be found there.
+ 
+ DAYNR:      a range of run days to access. For a single day,
+ can do something like "150-150"
+ 
+ PROD:       The production tag the data was produced under
+ example: P17id: production with SL17d ( star library )
+ 
+ TRGSETUP:   the trigger sets of the production
+ example: AuAu_200_production_mid_2014
+ Au+Au at 200 GeV mid luminosity collected in 2014
+ 
+ FILETYPE:   what type of data is being requested. Default: daq_reco_MuDst
+ 
+ ROOTDIR:    root directory of TSTarJetPicoMaker code
+ 
+ OUTDIR:     target output directory
+ 
+ TRIGGERS:   the set of triggers the Maker will reproduce: the mapping
+             between this index & trigger set is defined in the root macro
+	     
+ -->
+
+<job> 
+
+  <command>
+    <!-- set TRIGGERS=0 -->
+
+    ls 
+    setenv LOG &out;<!--/&TRGSETUP;-->/log/trigger_set_0<!--&TRIGGERS-->;<!--/&DAYNR;-->
+    setenv ERR &out;<!--/&TRGSETUP;-->/err/trigger_set_0<!--&TRIGGERS-->;<!--&DAYNR;-->
+    setenv OUT &out;<!--/&TRGSETUP;-->/out/trigger_set_0<!--&TRIGGERS-->;<!--/&DAYNR;-->
+    <!--setenv ROOTDIR /star/u/imooney/TStarJetPicoMaker-->
+    <!--set MACRO="MakeTStarJetPico_example.cxx"-->
+
+    mkdir StRoot
+    mv StRefMultCorr StRoot/
+
+    mkdir -p $LOG
+    mkdir -p $ERR
+    mkdir -p $OUT
+
+    starver pro
+    
+    root4star -q -b MakeTStarJetPico_example.cxx\(1e9,\"\&mulist;\",\"\&mclist;\",\"$JOBID\",100,0\)
+
+    mv $SCRATCH/*.root $OUT/
+    
+    zip $LOG/$JOBID.out.zip &log;/tmplogs/$JOBID.log
+    zip $ERR/$JOBID.err.zip &log;/tmplogs/$JOBID.err
+	
+ </command>
+
+ <SandBox installer="ZIP">
+	 <Package name="pAu15Pico"><!--_&TRGSETUP;_&DAYNR;">-->
+                <File>file:<!--&ROOTDIR;-->/star/u/imooney/TStarJetPicoMaker/macros/MakeTStarJetPico_example.cxx</File>
+                <File>file:<!--&ROOTDIR;-->/star/u/imooney/TStarJetPicoMaker/libs/libTStarJetPico.so</File>
+                <File>file:<!--&ROOTDIR;-->/star/u/imooney/TStarJetPicoMaker/libs/libTStarJetPicoMaker.so</File>
+                <File>file:<!--&ROOTDIR;-->/star/u/imooney/TStarJetPicoMaker/libs/libStRefMultCorr.so</File>
+                <File>file:<!--&ROOTDIR;-->/star/u/imooney/TStarJetPicoMaker/StRoot/StRefMultCorr/</File>
+         </Package>
+ </SandBox>
+ 
+ <Generator>
+   <Location><!--&ROOTDIR;-->/star/u/imooney/TStarJetPicoMaker/scheduler/report/</Location>
+   <ScriptLocation><!--&ROOTDIR;-->/star/u/imooney/TStarJetPicoMaker/scheduler/csh/</ScriptLocation>
+   <ListLocation><!--&ROOTDIR;-->/star/u/imooney/TStarJetPicoMaker/scheduler/list/</ListLocation>
+ </Generator>
+
+ <stdout URL="file:&log;/tmplogs/$JOBID.log" />
+ <stderr URL="file:&log;/tmplogs/$JOBID.err" />
+ <!--<input URL="file:&INPUT;"/>
+ <input URL="file:&INPUTMC;"/>
+ -->
+</job>
