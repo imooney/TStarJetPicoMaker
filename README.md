@@ -4,8 +4,8 @@
 
 **Relativistic Heavy Ion Collider, BNL**
 
-~~This project is Nick Elsey's, but I modify it slightly to take in STAR miniMCs as well, with no need for Geant files.
-Please address all praise to Nick, and all criticism to Isaac.~~ 
+This project is Nick Elsey's, but I modify it slightly to take in STAR miniMCs as well, with no need for Geant files.
+Please address all praise to Nick, and all criticism to Isaac.
 
 
 Produces TStarJetPico root files from STAR muDSTs,
