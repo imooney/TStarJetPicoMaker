@@ -85,8 +85,6 @@ Int_t TStarJetPicoMaker::Init() {
 }
 
 void  TStarJetPicoMaker::Clear(Option_t* option) {
-  delete mMCEvent; mMCEvent = nullptr;
-  delete mEvent; mEvent = nullptr;
   mBemcMatchedTracks.clear();
   StMaker::Clear(option);
 }
@@ -301,12 +299,7 @@ Int_t TStarJetPicoMaker::MakeMuDst() {
   
   /* create new event structures */
   mEvent = new TStarJetPicoEvent();
-  if (mMakeMC) mMCEvent = new TStarJetPicoEvent();
-
-  /*process MC event*/
-  MuProcessMCEvent();
   
-
   /* process primary tracks for the selected vertex */
   MuProcessPrimaryTracks();
   
@@ -327,10 +320,22 @@ Int_t TStarJetPicoMaker::MakeMuDst() {
   
   /* event is complete - fill the trees */
   mTree->Fill();
-  if (mMakeMC) mMCTree->Fill();
   
+  delete mEvent; mEvent = nullptr;
+ 
+  if (mMakeMC) mMCEvent = new TStarJetPicoEvent();
+ 
+  /*process MC event*/
+  MuProcessMCEvent(); 
+ 
+  /* event is complete - fill the trees */
+  if (mMakeMC) mMCTree->Fill();
+ 
+  delete mMCEvent; mMCEvent = nullptr;
+ 
   /* count the successful write & exit */
   mNAcceptedEvents++;
+
   return kStOk;
 }
 
@@ -474,7 +479,6 @@ Bool_t TStarJetPicoMaker::MuProcessPrimaryTracks() {
     if(muTrack->flag() < mTrackFlagMin || muTrack->nHitsFit() <= mTrackFitPointMin ||
         muTrack->dcaGlobal().mag() > mTrackDCAMax || muTrack->eta() > mTrackEtaMax ||
         muTrack->eta() < mTrackEtaMin) continue;
-    
     jetTrack.Clear();
     
     /* fill track information */
@@ -511,7 +515,6 @@ Bool_t TStarJetPicoMaker::MuProcessPrimaryTracks() {
     
     /* write track to event structure */
     mEvent->AddPrimaryTrack(&jetTrack);
-    
     /* project track to BEMC - used for
        tower/track matching
      */
@@ -898,23 +901,25 @@ Double_t TStarJetPicoMaker::PicoGetReactionPlane() {
 
 void TStarJetPicoMaker::MuProcessMCEvent() {
 
-  int nCount = 0;
+  //int nCount = 0;
   
   //const StPtrVecMcTrack& mcTracks = mStMiniMcEvent->primaryVertex()->daughters();
   //StMcTrackConstIterator mcTrkIter = mcTracks.begin();
   TClonesArray* mcTracks = mStMiniMcEvent->tracks(MC);
   TIter next(mcTracks);
+  
   //const int nTracks = mcTracks.size();
   
   //for (; mcTrkIter != mcTracks.end(); ++mcTrkIter) {
   while (StTinyMcTrack* track = (StTinyMcTrack *) next()) {
     //StMcTrack* track = *mcTrkIter;
     //StTinyMcTrack* track = (StTinyMcTrack*) mcTracks[i];
+  
     TStarJetPicoPrimaryTrack mTrack;
     if (!track->isPrimary()) {
       continue;//should effectively remove this non-primary from the event by not adding it to mMCEvent at the end of this for loop.
     }
-
+  
     
     mTrack.SetPx(track->pxMc());
     mTrack.SetPy(track->pyMc());
@@ -939,22 +944,23 @@ void TStarJetPicoMaker::MuProcessMCEvent() {
       mTrack.SetdEdx(0);
     }
     
+  
     mTrack.SetNOfFittedHits(track->nHitMc());//tpcHits().size()); //nHitMc should hopefully be # of TPC hits.
     mTrack.SetNOfPossHits(52);
     mTrack.SetKey(track->key());
     mTrack.SetEtaDiffHitProjected(0);
     mTrack.SetPhiDiffHitProjected(0);
-    nCount++;
+    //  nCount++; //this was in the original version of the maker, but its purpose is to hand the SetNOfPrimaryTracks call the number of primaries, while the AddPrimaryTrack function already does that (see TStarJetPicoEvent::AddPrimaryTrack for proof).
     
     mMCEvent->AddPrimaryTrack(&mTrack);
-    
+  
   }
   
   
     mMCEvent->GetHeader()->SetEventId(mStMiniMcEvent->eventId());//eventNumber());
     mMCEvent->GetHeader()->SetRunId(mStMiniMcEvent->runId());//runNumber());
     mMCEvent->GetHeader()->SetReferenceMultiplicity(mStMiniMcEvent->centralMult());//eventGeneratorFinalStateTracks());
-  mMCEvent->GetHeader()->SetNPrimaryTracks(nCount);
+    //mMCEvent->GetHeader()->SetNPrimaryTracks(nCount);
     mMCEvent->GetHeader()->SetNGlobalTracks(mStMiniMcEvent->nUncorrectedGlobals());//numberOfPrimaryTracks());
     mMCEvent->GetHeader()->SetReactionPlaneAngle(mStMiniMcEvent->impactPhi());//phiReactionPlane());
   
@@ -970,7 +976,7 @@ void TStarJetPicoMaker::MuProcessMCEvent() {
   mMCEvent->GetHeader()->SetNOfEMCPoints(0);
   mMCEvent->GetHeader()->SetNOfMatchedTowers(0);
   mMCEvent->GetHeader()->SetNOfTowers(0);
-  mMCEvent->GetHeader()->SetNOfPrimaryTracks(nCount);
+  //mMCEvent->GetHeader()->SetNOfPrimaryTracks(nCount);//see note next to "//nCount++"
   mMCEvent->GetHeader()->SetNOfMatchedTracks(0); //why is this 0?
   
   return;

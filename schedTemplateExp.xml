@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE note [
-<!ENTITY out "/gpfs01/star/pwg/imooney/P18ih/picos/pAu_200_production_2015/out">
+<!ENTITY mclist "/direct/star+u/imooney/TStarJetPicoMaker/list/minimcs911_04.list">
 <!ENTITY lib "pro">
 <!ENTITY mulist "/direct/star+u/imooney/TStarJetPicoMaker/list/MuDsts911_04.list">
 <!ENTITY log "/gpfs01/star/pwg/imooney/P18ih/picos/pAu_200_production_2015/log">
-<!ENTITY mclist "/direct/star+u/imooney/TStarJetPicoMaker/list/minimcs911_04.list">
+<!ENTITY out "/gpfs01/star/pwg/imooney/P18ih/picos/pAu_200_production_2015/out">
 ]>
-<!-- Created on Mon Mar  2 14:13:04 2020 -->
+<!-- Created on Mon Mar  9 14:46:59 2020 -->
 <!--<!DOCTYPE note [
 <!ENTITY NFILES "all">
 <!ENTITY MACRO "MakeTStarJetPico_example.cxx">

@@ -40,9 +40,9 @@ def main(args):
   filelist = listAllFiles(args.listdir)
 
   ## sort the files into mu and mc lists
-  find_mu = re.compile('MuDsts\d+_\d+.list')
+  find_mu = re.compile('MuDsts\d+_\d+.list') #('templist.list')
   mu_list = []
-  find_mc = re.compile('minimcs\d+_\d+.list')
+  find_mc = re.compile('minimcs\d+_\d+.list') #('templistMc.list')
   mc_list = []
   print(find_mu)
   print(find_mc)

@@ -104,6 +104,9 @@ void MakeTStarJetPico_example(int nEvents = 1e3,
 
   std::string unique_id = filestr.substr(pos_begin, pos_back - pos_begin);
   std::string unique_name = "pt-hat"+unique_id;
+  
+  //TEMP -- replace with line above when you're done testing!!
+  //  std::string unique_name = "debuggerino";
 
   // builds the TStarJetPicoDST
   //format: TStarJetPicoMaker::TStarJetPicoMaker(std::string outFileName, TChain* mcTree, inputMode input, std::string name, int nFiles, int trigSet)
