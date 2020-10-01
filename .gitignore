@@ -65,6 +65,7 @@ MakeTStarJetPico.cxx
 MakeTStarJetPicoOldMaker.cxx
 
 all_lists
+*.list
 
 # condor file
 CondorFile

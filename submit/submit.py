@@ -26,7 +26,9 @@ def main(args):
 
   ## create output from input variables
   #param_string = "geantid_{}_dca_{}_nhit_{}_nhitfrac_{}".format(args.geantid, args.dca, args.nhit, args.nhitfrac)
+  print('TRAZAN: ',args.outputroot)
   out_base = os.path.join(args.outputroot, args.production, args.outputtag)#, param_string)
+  print('TRAZODAN: ',out_base)
   log_dir = os.path.join(out_base, "log")
   out_dir = os.path.join(out_base, "out")
 
@@ -40,12 +42,21 @@ def main(args):
   filelist = listAllFiles(args.listdir)
 
   ## sort the files into mu and mc lists
-  find_mu = re.compile('MuDsts\d+_\d+.list') #('templist.list')
+  #find_mu = re.compile('MuDst_sample_\d+.list')
+  find_mu = re.compile('MuDsts\d+_\d+.list')
+  #find_mu = re.compile('MuDsts1525_06.list')
+  #find_mu = re.compile('MuDsts1115_\d+.list')
+  #find_mu = re.compile('templist.list')
   mu_list = []
-  find_mc = re.compile('minimcs\d+_\d+.list') #('templistMc.list')
+  #find_mc = re.compile('minimc_sample_\d+.list')
+  find_mc = re.compile('minimcs\d+_\d+.list')
+  #find_mc = re.compile('minimcs1525_06.list')
+  #find_mc = re.compile('minimcs1115_\d+.list')
+  #find_mc = re.compile('templistMc.list')
   mc_list = []
   print(find_mu)
   print(find_mc)
+  print(filelist)
   print('huluuuuuuuuuuu')
   for file in filelist :
     if find_mu.search(file) :
@@ -100,9 +111,9 @@ def main(args):
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description='Submit jobs to generate embedding picos', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   parser.add_argument('--submitscript', default='submit/jetPicoProduction_example.xml', help='the xml file for star-submit-template')
-  parser.add_argument('--listdir', default='list', help='directory to lists of mu and mc lists')
+  parser.add_argument('--listdir', default='list_AA', help='directory to lists of mu and mc lists')#list_sample_prod
   parser.add_argument('--production', default='P18ih', help='production tag associated with the data embedded into')
-  parser.add_argument('--outputtag', default='picos/pAu_200_production_2015', help='output directory name (appended to outputroot/production')
+  parser.add_argument('--outputtag', default='picos/AA_embed/', help='output directory name (appended to outputroot/production')#TEST_pAu_200_production_2015
   parser.add_argument('--library', default='pro', help='STAR library version to run analysis with')
   parser.add_argument('--outputroot', default='/gpfs01/star/pwg/imooney', help='root directory for all output and logs')
   #parser.add_argument('--dca', default='3.0', help='dca cut for reconstructed tracks')

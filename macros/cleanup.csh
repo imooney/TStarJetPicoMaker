@@ -23,7 +23,6 @@ rm -rv libs/*.so
 rm -rv *.tmp 
 rm -rv *.zip
 
-rm -rv /gpfs01/star/pwg/imooney/P18ih/picos/pAu_200_production_2015/log/tmplogs/*
-rm -rv /gpfs01/star/pwg/imooney/P18ih/picos/pAu_200_production_2015/out/err/trigger_set_0/*
-rm -rv /gpfs01/star/pwg/imooney/P18ih/picos/pAu_200_production_2015/out/log/trigger_set_0/*
-
+rm -rv /gpfs01/star/pwg/imooney/P18ih/picos/AA_embed/log/tmplogs/*
+rm -rv /gpfs01/star/pwg/imooney/P18ih/picos/AA_embed/out/err/trigger_set_0/*
+rm -rv /gpfs01/star/pwg/imooney/P18ih/picos/AA_embed/out/log/trigger_set_0/*

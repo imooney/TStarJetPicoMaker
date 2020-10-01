@@ -13,6 +13,7 @@ TStarJetPicoEventHeader::TStarJetPicoEventHeader()
   : TObject()
   , fEventId(0)
   , fRunId(0)
+  , fBTofMult(0)
   , fRefMult(0)
   , fRefMultRank0(0)
   , fGRefMult(0)
@@ -74,6 +75,7 @@ TStarJetPicoEventHeader::TStarJetPicoEventHeader(const TStarJetPicoEventHeader &
   : TObject(t)
   , fEventId(t.fEventId)
   , fRunId(t.fRunId)
+  , fBTofMult(t.fBTofMult)
   , fRefMult(t.fRefMult)
   , fRefMultRank0(t.fRefMultRank0)
   , fGRefMult(t.fGRefMult)
@@ -139,7 +141,8 @@ TStarJetPicoEventHeader::~TStarJetPicoEventHeader()
 void TStarJetPicoEventHeader::Clear(Option_t */*Option*/)
 {
   fEventId = 0;              
-  fRunId = 0;                
+  fRunId = 0;            
+  fBTofMult = 0;
   fRefMult = 0;
   fRefMultRank0 = 0;
   fGRefMult = 0;

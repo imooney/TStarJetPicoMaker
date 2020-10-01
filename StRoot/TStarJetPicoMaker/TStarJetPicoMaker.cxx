@@ -42,6 +42,7 @@
 #include "StEmcClusterCollection.h"
 #include "StDaqLib/EMC/StEmcDecoder.h"
 
+#include <math.h>
 
 ClassImp(TStarJetPicoMaker)
 
@@ -262,7 +263,10 @@ Int_t TStarJetPicoMaker::MakeMuDst() {
 
   /* got the event - count it */
   mNEvents++;
-
+  //LOG_INFO << "MAKER EVENT NUMBER " << mNEvents << endm;
+  //LOG_INFO << "MUDST EVENT ID = " << (unsigned) mMuDst->event()->eventId() << " AND RUN ID = " << (unsigned) mMuDst->event()->runId() << endm;
+  
+    /*LOG_DEBUG*/
   /* selects the primary vertex either by rank,
      or by Vpd - VPD with rank as a backup
      when no VPD match can be found is used as default
@@ -297,6 +301,8 @@ Int_t TStarJetPicoMaker::MakeMuDst() {
    */
   if (!mEventSelector->AcceptEvent(mMuInputEvent)) return kStOk;
   
+  //LOG_INFO << "wisdom: EVENT " << mNEvents << " IS OKAY" << endm;
+    /*LOG_DEBUG*/
   /* create new event structures */
   mEvent = new TStarJetPicoEvent();
   
@@ -475,6 +481,12 @@ Bool_t TStarJetPicoMaker::MuProcessPrimaryTracks() {
   mBemcMatchedTracks.resize(nTracks);
   for (UInt_t i = 0; i < nTracks; ++i) {
     muTrack = (StMuTrack*) mMuDst->primaryTracks(i);
+    
+    //TEMP FOR DEBUG (although it shouldn't hurt if you forget to remove this after
+    if (muTrack->charge() == -9999 || muTrack->eta() > 10 || muTrack->eta() < -10) {
+      continue;
+    }
+
     /* check if track will be saved to event structure */
     if(muTrack->flag() < mTrackFlagMin || muTrack->nHitsFit() <= mTrackFitPointMin ||
         muTrack->dcaGlobal().mag() > mTrackDCAMax || muTrack->eta() > mTrackEtaMax ||
@@ -484,7 +496,17 @@ Bool_t TStarJetPicoMaker::MuProcessPrimaryTracks() {
     /* fill track information */
     jetTrack.SetPx(muTrack->momentum().x());
     jetTrack.SetPy(muTrack->momentum().y());
+    if (/*muTrack->momentum().z() != muTrack->momentum().z()*/ isnan(muTrack->momentum().z())) {
+      //LOG_INFO << "UNDEFINED MU PZ (primary track " << (unsigned) i << ") in event " << (unsigned) mMuDst->event()->eventId() << " of run " << (unsigned) mMuDst->event()->runId() << endm;
+    }
     jetTrack.SetPz(muTrack->momentum().z());
+    if (isnan(jetTrack.GetPz())) {
+      //LOG_INFO << "UNDEFINED PICO PZ (primary track " << (unsigned) i << ") in event " << (unsigned) mMuDst->event()->eventId() << " of run " << (unsigned) mMuDst->event()->runId() << endm;
+    }
+    if (/*mMuDst->event()*/mMuInputEvent->eventId() == 2820 && /*mMuDst->event()*/mMuInputEvent->runId() == 16143009) {
+      //LOG_INFO << "WRONG SIDE OF THE TRACKS! primary track " << (unsigned) i << " has mupz " << (unsigned) muTrack->momentum().z() << " and picopz " << (unsigned) jetTrack.GetPz() << endm;
+    }
+    
     jetTrack.SetDCA(muTrack->dcaGlobal().mag());
     jetTrack.SetdEdx(muTrack->dEdx());
     jetTrack.SetNsigmaPion(muTrack->nSigmaPion());
@@ -721,17 +743,27 @@ void TStarJetPicoMaker::MuProcessTriggerObjects() {
   Int_t bht1 = mTriggerSimu->bemc->barrelHighTowerTh(1);
   Int_t bht2 = mTriggerSimu->bemc->barrelHighTowerTh(2);
   Int_t bht3 = mTriggerSimu->bemc->barrelHighTowerTh(3);
-  LOG_DEBUG << "High Tower trigger thresholds: bht0 " << bht0 << " bht1: " << bht1 << " bht2: " << bht2 << " bht3: " << bht3 << endm;
-  
+  //LOG_INFO << "wisdom: High Tower trigger thresholds: bht0 " << bht0 << " bht1: " << bht1 << " bht2: " << bht2 << " bht3: " << bht3 << endm;
+  /*LOG_DEBUG*/
+
   TStarJetPicoTriggerInfo trigobj;
   bool count_tows = 0;
+  //DEBUG:
+  vector<unsigned> adc20(20,0);
   for (unsigned towerId = 1; towerId <= 4800; ++towerId) {
     int status;
     mTriggerSimu->bemc->getTables()->getStatus(BTOW, towerId, status);
     const Int_t adc = mTriggerSimu->bemc->barrelHighTowerAdc(towerId);
-    
+    if (adc > 18) {adc20[19] ++;}
+    else if (adc >= 0 && adc <= 18){ adc20[adc] ++;}
+    //LOG_INFO << "wisdom: ADC: " << (unsigned) adc << endm;
     //HERE WE MANUALLY ADD THE HT2 TRIGGER IF AT LEAST ONE TOWER IS ABOVE THE BHT2 THRESHOLD. NOT IDEAL BUT OH WELL
-    if (bht2 > 0 && adc > bht2 && count_tows == 0) { /*LOG_INFO << "HIDDEN VALLEY RANCH!!!" << endm;*/ mEvent->GetHeader()->AddTriggerId(500205); mEvent->GetHeader()->AddTriggerId(500215); count_tows ++; }
+    if (bht2 > 0 && adc > bht2 && count_tows == 0) {
+      //LOG_INFO << "wisdom: ADDING TRIGGERS FOR EVENT " << (unsigned) /*mEvent->GetHeader()->GetEventId()*/mMuInputEvent->eventId() << " of run " << (unsigned) /*mEvent->GetHeader()->GetRunId()*/mMuInputEvent->runId() << " thanks to a tower with ADC " << (unsigned) adc << endm;
+      mEvent->GetHeader()->AddTriggerId(500205);
+      mEvent->GetHeader()->AddTriggerId(500215);
+      count_tows ++;
+    }//passed the threshold; added the trigger by hand
     Int_t trigMap = 0;
     Float_t eta, phi;
     mBEMCGeom->getEtaPhi(towerId, eta, phi);
@@ -741,8 +773,8 @@ void TStarJetPicoMaker::MuProcessTriggerObjects() {
     if (bht3 > 0 && adc > bht3) trigMap |= 1 << 3;
     
     if (trigMap & 0xf) {
-      LOG_DEBUG << "high tower trigger found. ADC: " << adc << endm;
-      
+      //LOG_INFO << "wisdom: high tower trigger found. ADC: " << adc << endm;
+      /*LOG_DEBUG*/
       trigobj.Clear();
       trigobj.SetEta(eta);
       trigobj.SetPhi(phi);
@@ -754,6 +786,13 @@ void TStarJetPicoMaker::MuProcessTriggerObjects() {
     }
   }
   
+  //LOG_INFO << "wisdom: AFTER TOWER LOOP: " << endm;
+  //LOG_INFO << "n tows / adc [0 - 19+]" << endm;
+  //for(int i = 0; i < adc20.size(); ++i) {
+    //LOG_INFO << (unsigned) adc20[i] << " ";
+  //}
+  //LOG_INFO << endm;
+
   /* get trigger thresholds for JP */
   Int_t jp0  = mTriggerSimu->bemc->barrelJetPatchTh(0);
   Int_t jp1  = mTriggerSimu->bemc->barrelJetPatchTh(1);
@@ -841,6 +880,8 @@ Bool_t TStarJetPicoMaker::MuFillHeader() {
   else                      mEvent->GetHeader()->SetvpdVz(9999);
   
   /* fill all other event level information */
+  mEvent->GetHeader()->SetBTofMult(mMuDst->numberOfBTofHit());
+
   mEvent->GetHeader()->SetEventId(mMuInputEvent->eventId());
   mEvent->GetHeader()->SetRunId(mMuInputEvent->runId());
   mEvent->GetHeader()->SetNGlobalTracks(mMuDst->numberOfGlobalTracks());

@@ -67,8 +67,8 @@
 
     starver pro
     
-    root4star -q -b MakeTStarJetPico_example.cxx\(1e9,\"\&mulist;\",\"\&mclist;\",\"$JOBID\",100,0\)
-
+    root4star -q -b MakeTStarJetPico_example.cxx\(1e9,\"\&mulist;\",\"\&mclist;\",\"$JOBID\",25,0\)
+    
     mv $SCRATCH/*.root $OUT/
     
     zip $LOG/$JOBID.out.zip &log;/tmplogs/$JOBID.log

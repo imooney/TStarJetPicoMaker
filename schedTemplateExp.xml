@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE note [
-<!ENTITY mclist "/direct/star+u/imooney/TStarJetPicoMaker/list/minimcs911_04.list">
+<!ENTITY out "/gpfs01/star/pwg/imooney/P18ih/picos/AA_embed/out">
 <!ENTITY lib "pro">
-<!ENTITY mulist "/direct/star+u/imooney/TStarJetPicoMaker/list/MuDsts911_04.list">
-<!ENTITY log "/gpfs01/star/pwg/imooney/P18ih/picos/pAu_200_production_2015/log">
-<!ENTITY out "/gpfs01/star/pwg/imooney/P18ih/picos/pAu_200_production_2015/out">
+<!ENTITY mclist "/direct/star+u/imooney/TStarJetPicoMaker/list_AA/minimcs3040_04.list">
+<!ENTITY mulist "/direct/star+u/imooney/TStarJetPicoMaker/list_AA/MuDsts3040_04.list">
+<!ENTITY log "/gpfs01/star/pwg/imooney/P18ih/picos/AA_embed/log">
 ]>
-<!-- Created on Mon Mar  9 14:46:59 2020 -->
+<!-- Created on Thu Oct  1 14:27:00 2020 -->
 <!--<!DOCTYPE note [
 <!ENTITY NFILES "all">
 <!ENTITY MACRO "MakeTStarJetPico_example.cxx">
@@ -75,8 +75,8 @@
 
     starver pro
     
-    root4star -q -b MakeTStarJetPico_example.cxx\(1e9,\"\&mulist;\",\"\&mclist;\",\"$JOBID\",100,0\)
-
+    root4star -q -b MakeTStarJetPico_example.cxx\(1e9,\"\&mulist;\",\"\&mclist;\",\"$JOBID\",25,0\)
+    
     mv $SCRATCH/*.root $OUT/
     
     zip $LOG/$JOBID.out.zip &log;/tmplogs/$JOBID.log

@@ -24,7 +24,7 @@ cd -
 cp -v ${JETPICODIR}/*.so ./libs/
 cp -v ${JETPICODIR}/*.so ./sandbox/
 
-setenv CXXFLAGSNEW "-pipe -fPIC -Wall -Woverloaded-virtual -ansi -Wno-long-long -pthread -I${JETPICODIR} -m32"
+setenv CXXFLAGSNEW "-std=c++11 -pipe -fPIC -Wall -Woverloaded-virtual -Wno-long-long -pthread -I${JETPICODIR} -m32"
 #LDFLAGS       += -m32
 
 echo "[i] Changing CXXFLAGS to:"${CXXFLAGSNEW}

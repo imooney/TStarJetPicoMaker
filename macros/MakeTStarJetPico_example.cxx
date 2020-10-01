@@ -61,6 +61,8 @@ void MakeTStarJetPico_example(int nEvents = 1e3,
   // load local TStarJetPico library & its maker
   gSystem->Load( "libTStarJetPico.so" );
   gSystem->Load( "libTStarJetPicoMaker.so" );
+
+  cout << "DEBUG A" << endl;
 	
   StChain* chain           = new StChain( "StChain" );
   TChain * mcChain         = new TChain ( "TChain" );
@@ -83,6 +85,8 @@ void MakeTStarJetPico_example(int nEvents = 1e3,
   control_table->DeductPedestal[1] = 2;
   adc->saveAllStEvent( kTRUE );
   
+  cout << "DEBUG B" << endl;
+
   // simulates a trigger response based on an ADC value & trigger definitions
   StTriggerSimuMaker* trigsim = new StTriggerSimuMaker();
   trigsim->setMC( false ); //CHANGE IF GOING BACK TO DATA!!
@@ -95,6 +99,7 @@ void MakeTStarJetPico_example(int nEvents = 1e3,
   //making the nametag for output root files
   std::string filestr = (std::string) std::string(filelistMC);
   std::string front = "minimcs";
+  //std::string front = "minimc_sample";
   size_t front_len = front.size();
   size_t pos_front = filestr.find(front);
   size_t pos_begin = pos_front + front_len;
@@ -110,7 +115,7 @@ void MakeTStarJetPico_example(int nEvents = 1e3,
 
   // builds the TStarJetPicoDST
   //format: TStarJetPicoMaker::TStarJetPicoMaker(std::string outFileName, TChain* mcTree, inputMode input, std::string name, int nFiles, int trigSet)
-  TStarJetPicoMaker *jetPicoMaker = new TStarJetPicoMaker( Form( "%s.root", /*nametag*/unique_name ), mcChain, 1, nametag, nFiles, trigSet );
+  TStarJetPicoMaker *jetPicoMaker = new TStarJetPicoMaker( Form( "%s.root", unique_name ), mcChain, 1, nametag, nFiles, trigSet );
   jetPicoMaker->ProcessMC(1);
   jetPicoMaker->SetVertexSelector( TStarJetPicoMaker::VpdOrRank );
   jetPicoMaker->SetTowerAcceptMode( TStarJetPicoMaker::RejectBadTowerStatus );
@@ -122,18 +127,21 @@ void MakeTStarJetPico_example(int nEvents = 1e3,
   jetPicoMaker->SetTrackFitPointMin( 10 );
   jetPicoMaker->SetTrackDCAMax( 3.0 );
   jetPicoMaker->SetTrackFlagMin( 0 );
+
+  cout << "DEBUG C" << endl;
   // set triggers to be reproduced
+  /*
   switch (trigSet) {
   case 0://BHT2*BBCMB for Y15 p+Au
     //COMMENTING OUT THESE TWO EVENT CUTS BECAUSE WE'LL DO TRIGGER SELECTION ONCE WE HAVE THE PICOS
     //jetPicoMaker->EventCuts()->AddTrigger(500205);
     //jetPicoMaker->EventCuts()->AddTrigger(500215);
     //these are the AuAu triggers
-    /*jetPicoMaker->EventCuts()->AddTrigger(450202);
-      jetPicoMaker->EventCuts()->AddTrigger(450212);
-      jetPicoMaker->EventCuts()->AddTrigger(450203);
-      jetPicoMaker->EventCuts()->AddTrigger(450213);
-    */
+    //jetPicoMaker->EventCuts()->AddTrigger(450202);
+    //jetPicoMaker->EventCuts()->AddTrigger(450212);
+    //jetPicoMaker->EventCuts()->AddTrigger(450203);
+    //jetPicoMaker->EventCuts()->AddTrigger(450213);
+    
       break;
   case 1://JP2 for Y15 p+Au [CAUTION USING THIS - ABNORMAL JP2 THRESHOLD FOR NEGATIVE RAPIDITY]
     //COMMENTING OUT THESE TWO EVENT CUTS BECAUSE WE'LL DO TRIGGER SELECTION ONCE WE HAVE THE PICOS
@@ -141,24 +149,25 @@ void MakeTStarJetPico_example(int nEvents = 1e3,
     //jetPicoMaker->EventCuts()->AddTrigger(500411);
       
       //these are the AuAu triggers
-      /*
-      jetPicoMaker->EventCuts()->AddTrigger(450010);
-      jetPicoMaker->EventCuts()->AddTrigger(450020);
-      jetPicoMaker->EventCuts()->AddTrigger(450008);
-      jetPicoMaker->EventCuts()->AddTrigger(450018);
-      jetPicoMaker->EventCuts()->AddTrigger(450012);
-      jetPicoMaker->EventCuts()->AddTrigger(450022);
-      */
+      
+      //jetPicoMaker->EventCuts()->AddTrigger(450010);
+      //jetPicoMaker->EventCuts()->AddTrigger(450020);
+      //jetPicoMaker->EventCuts()->AddTrigger(450008);
+      //jetPicoMaker->EventCuts()->AddTrigger(450018);
+      //jetPicoMaker->EventCuts()->AddTrigger(450012);
+      //jetPicoMaker->EventCuts()->AddTrigger(450022);
+      
       break;
     default :
       break;
   }
-
+*/
   // for each event, print the memory usage
   // helpful for debugging
-  StMemStat memory;
-  memory.PrintMem( NULL );
-	
+  //StMemStat memory;
+  //memory.PrintMem( NULL );
+  cout << "DEBUG D" << endl;
+  
   if ( chain->Init() ) { cout<<"StChain failed init: exiting"<<endl; return;}
   cout << "chain initialized" << endl;
 	
@@ -166,12 +175,14 @@ void MakeTStarJetPico_example(int nEvents = 1e3,
   TStopwatch timer;
 	
   int i=0;
+  cout << "DEBUG E" << endl;
   while ( i < nEvents && chain->Make() == kStOk ) {
+    cout << "DEBUG F" << endl;
     if ( i % 500 == 0 ) {
       cout<<"done with event "<<i;
       cout<<"\tcpu: "<<timer.CpuTime()<<"\treal: "<<timer.RealTime()<<"\tratio: "<<timer.CpuTime()/timer.RealTime();//<<endl;
       timer.Start();
-      memory.PrintMem( NULL );
+      //memory.PrintMem( NULL );
     }
     i++;
     chain->Clear();
